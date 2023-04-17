@@ -2,8 +2,8 @@ import cv2 as cv
 import numpy as np
 
 
-MAX_SPEED = 1
-ACCELERATION_STD = 0.01
+MAX_SPEED = 0.6
+ACCELERATION_STD = 0.05
 
 
 class Colony:
@@ -23,32 +23,36 @@ class Colony:
             position = [np.random.randint(0, self.background.shape[0]),
                         np.random.randint(0, self.background.shape[1])]
             colour = (0, 0, 0)
-            new_ant = Ant(position, 5, 5, colour)
+            new_ant = Ant(position, 3, colour)
             self.ants.append(new_ant)
 
     def update(self):
+        limits = (self.background.shape[0], self.background.shape[1])
         for ant in self.ants:
-            ant.move()
+            ant.move(limits)
 
-    def draw_ant_trails(self):
-        for ant in self.ants:
-            ant.draw_trail(self.hist_scene)
+    def show_with_trails(self):
+        while True:
+            self.update()
+            self.live_scene = self.hist_scene.copy()
+            for ant in self.ants:
+                ant.draw_body(self.live_scene)
+                ant.draw_trail(self.hist_scene)
 
-    def draw_ants(self):
-        self.live_scene = self.hist_scene.copy()
-        for ant in self.ants:
-            ant.draw(self.live_scene)
+            cv.imshow("ants with trails", self.live_scene)
+            if cv.waitKey(10) == ord('q'):
+                # press q to terminate the loop
+                cv.destroyAllWindows()
+                break
 
     def show(self):
         while True:
             self.update()
-            self.draw_ants()
-            self.draw_ant_trails()
-            # alpha = 0.5
-            # beta = (1.0 - alpha)
-            # scene = cv.addWeighted(
-            #     self.live_scene, alpha, self.hist_scene, beta, 0.0)
-            cv.imshow("scene", self.live_scene)
+            self.live_scene = self.background.copy()
+            for ant in self.ants:
+                ant.draw_body(self.live_scene)\
+
+            cv.imshow("ants", self.live_scene)
             if cv.waitKey(10) == ord('q'):
                 # press q to terminate the loop
                 cv.destroyAllWindows()
@@ -56,40 +60,50 @@ class Colony:
 
 
 class Ant:
-    def __init__(self, position, width, height, colour):
+    def __init__(self, position, size, colour):
         self.position = position
         self.colour = colour
-        self.width = width
-        self.height = height
+        self.size = size
         self.speed = 0
         self.acceleration = 0
 
-    def move(self):
+    def move(self, limits):
         self.acceleration = np.random.normal(0, 1, 2) * ACCELERATION_STD
         self.speed += self.acceleration
 
-        if np.linalg.norm(self.speed) > MAX_SPEED:
-            self.speed = MAX_SPEED
+        speed_norm = np.linalg.norm(self.speed)
+        if speed_norm > MAX_SPEED:
+            self.speed = self.speed/speed_norm
+            self.speed *= MAX_SPEED
 
         self.position += self.speed
 
-    def draw(self, scene):
-        # pt1 = (int(self.position[0]), int(self.position[1]))
-        # pt2 = (int(self.position[0] + self.width),
-        #        int(self.position[1] + self.height))
-        # scene = cv.rectangle(scene, pt1, pt2, self.colour, -1)
-        pt1 = (int(self.position[0]), int(self.position[1]))
-        scene = cv.circle(scene, pt1, self.width, self.colour, -1)
+        if self.position[0] > limits[0]:
+            self.position[0] = 0
+
+        if self.position[1] > limits[1]:
+            self.position[1] = 0
+
+        if self.position[0] < 0:
+            self.position[0] = limits[0]
+
+        if self.position[1] < 0:
+            self.position[1] = limits[1]
 
     def draw_trail(self, scene):
         pt1 = (int(self.position[0]), int(self.position[1]))
         scene = cv.circle(scene, pt1, 1, self.colour, -1)
+
+    def draw_body(self, scene):
+        pt1 = (int(self.position[0]), int(self.position[1]))
+        scene = cv.circle(scene, pt1, self.size, self.colour, -1)
 
 
 def main():
     colony = Colony()
     colony.add_background(400, 400)
     colony.add_ants(20)
+    colony.show_with_trails()
     colony.show()
 
 
