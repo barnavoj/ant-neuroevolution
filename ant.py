@@ -1,7 +1,8 @@
 import cv2 as cv
 import numpy as np
-from config import ACCELERATION_STD, MAX_SPEED
 
+from config import ACCELERATION_STD, MAX_SPEED
+from sklearn.neural_network import MLPRegressor
 
 class Ant:
     def __init__(self, position, size, colour):
@@ -10,10 +11,16 @@ class Ant:
         self.size = size
         self.speed = 0
         self.acceleration = 0
+        
+        self.brain = MLPRegressor(hidden_layer_sizes=(5,), max_iter=1)
+        self.brain.fit([[0,0,0,0]],[[0,0]])        
 
 
     def move(self, limits):
-        self.acceleration = np.random.normal(0, 1, 2) * ACCELERATION_STD
+        # self.acceleration = np.random.normal(0, 1, 2) * ACCELERATION_STD
+        
+        self.acceleration = self.brain.predict([[1,1,1,1]])[0]
+        
         self.speed += self.acceleration
 
         speed_norm = np.linalg.norm(self.speed)
