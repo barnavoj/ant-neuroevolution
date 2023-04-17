@@ -46,7 +46,7 @@ class Scene:
         for i in range(num_food):
             position = [np.random.randint(0, self.scene_shape[0]),
                         np.random.randint(0, self.scene_shape[1])]
-            colour = (0, 120, 120)
+            colour = (0, 0, 255)
             new_food = Food(position, 5, colour)
             self.food.append(new_food)
 
