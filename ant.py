@@ -17,11 +17,9 @@ class Ant:
         # brain outputs ant.acceleration vector
         self.brain.fit([[0,0,0,0]],[[0,0]])        
 
-    def think(self, limits, food):
+    def think(self, limits, nearest_food):
         # self.acceleration = np.random.normal(0, 1, 2) * ACCELERATION_STD
-        
-        nearest_food = food[0]
-        
+              
         # normalize inputs
         sx = self.position[1] / limits[1]
         sy = self.position[0] / limits[0]
@@ -56,6 +54,8 @@ class Ant:
         pt1 = (int(self.position[1]), int(self.position[0]))
         scene = cv.circle(scene, pt1, 1, self.colour, -1)
 
-    def draw_body(self, scene):
+    def draw_body(self, scene, index):
         pt1 = (int(self.position[1]), int(self.position[0]))
         scene = cv.circle(scene, pt1, self.size, self.colour, -1)
+        ## debug index
+        #scene = cv.putText(scene, str(index), pt1, cv.FONT_ITALIC, 0.5, (0,0,0), 2)

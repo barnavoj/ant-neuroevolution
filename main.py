@@ -2,6 +2,8 @@ import cv2 as cv
 import numpy as np
 import time
 
+from helpers import find_closest_food
+
 from ant import Ant
 from food import Food
 
@@ -21,13 +23,19 @@ class Colony:
             colour = (0, 0, 0)
             new_ant = Ant(position, 3, colour)
             self.ants.append(new_ant)
+       
 
     def update(self, food):
         limits = (self.scene_shape[0], self.scene_shape[1])
-        for ant in self.ants:
-            ant.think(limits, food)
-            ant.move(limits)
+    
+        for i, ant in enumerate(self.ants):
+            #find nearest food
+            closest_food_index = find_closest_food(ant, food)
 
+            ant.think(limits, food[closest_food_index])
+            ant.move(limits)
+            
+            #print("Ant " + str(i) + " closest food: " + str(closest_food_index))
 
 class Scene:
     def __init__(self, colony):
@@ -59,13 +67,13 @@ class Scene:
             #Show Colony
             self.colony.update(self.food)
             self.live_scene = self.hist_scene.copy()
-            for ant in self.colony.ants:
-                ant.draw_body(self.live_scene)
+            for i, ant in enumerate(self.colony.ants):
+                ant.draw_body(self.live_scene, i)
                 ant.draw_trail(self.hist_scene)
                 
             #Show food
-            for food in self.food:
-                food.draw(self.live_scene)
+            for i, food in enumerate(self.food):
+                food.draw(self.live_scene, i)
             
             if frame % 30 == 0:
                 dt = time.time() - t
@@ -87,16 +95,16 @@ class Scene:
             #Show Colony
             self.colony.update(self.food)
             self.live_scene = self.background.copy()
-            for ant in self.colony.ants:
-                ant.draw_body(self.live_scene)
+            for i, ant in enumerate(self.colony.ants):
+                ant.draw_body(self.live_scene, i)
                 
             #Show food
-            for food in self.food:
-                food.draw(self.live_scene)
+            for i, food in enumerate(self.food):
+                food.draw(self.live_scene, i)
 
             if frame % 30 == 0:
                 dt = time.time() - t
-                print("FPS: ", round(30*1/dt))
+                #print("FPS: ", round(30*1/dt))
                 t = time.time()
 
             cv.imshow("ants", self.live_scene)
@@ -109,8 +117,8 @@ class Scene:
 
 def main():
     scene_shape = (800, 1000)
-    num_ants = 50
-    num_food = 10
+    num_ants = 2
+    num_food = 2
     
     colony = Colony(scene_shape)
     colony.add_ants(num_ants)
