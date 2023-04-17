@@ -4,7 +4,7 @@ import time
 
 
 MAX_SPEED = 0.6
-ACCELERATION_STD = 0.05
+ACCELERATION_STD = 0.041
 
 
 class Colony:
