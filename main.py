@@ -3,6 +3,7 @@ import numpy as np
 import time
 
 from ant import Ant
+from food import Food
 
 
 class Colony:
@@ -31,32 +32,46 @@ class Colony:
 class Scene:
     def __init__(self, colony):
         self.colony = colony
+        self.food = []
         
     def add_background(self, scene_shape):
-        self.background = np.ones((scene_shape[0], scene_shape[1], 3)) * 255
+        self.scene_shape = scene_shape
+        self.background = np.ones((self.scene_shape[0], self.scene_shape[1], 3)) * 255
         self.hist_scene = self.background.copy()
         self.live_scene = self.background.copy()
         
-    def add_food(self):
-        self.food = [np.random.randint(0, self.background.shape[0]),
-                     np.random.randint(0, self.background.shape[1])]
+    def add_food(self, num_food):
+        self.num_food = num_food
+
+        for i in range(num_food):
+            position = [np.random.randint(0, self.scene_shape[0]),
+                        np.random.randint(0, self.scene_shape[1])]
+            colour = (0, 120, 120)
+            new_food = Food(position, 5, colour)
+            self.food.append(new_food)
 
     def show_with_trails(self):
         frame = 0
         t = 0
         while True:
             frame += 1
+            
+            #Show Colony
             self.colony.update(self.food)
             self.live_scene = self.hist_scene.copy()
             for ant in self.colony.ants:
                 ant.draw_body(self.live_scene)
                 ant.draw_trail(self.hist_scene)
-
+                
+            #Show food
+            for food in self.food:
+                food.draw(self.live_scene)
+            
             if frame % 30 == 0:
                 dt = time.time() - t
                 print("FPS: ", round(30*1/dt))
                 t = time.time()
-
+            
             cv.imshow("ants with trails", self.live_scene)
             if cv.waitKey(1) == ord('q'):
                 # press q to terminate the loop
@@ -68,10 +83,16 @@ class Scene:
         t = 0
         while True:
             frame += 1
+            
+            #Show Colony
             self.colony.update(self.food)
             self.live_scene = self.background.copy()
             for ant in self.colony.ants:
                 ant.draw_body(self.live_scene)
+                
+            #Show food
+            for food in self.food:
+                food.draw(self.live_scene)
 
             if frame % 30 == 0:
                 dt = time.time() - t
@@ -88,12 +109,15 @@ class Scene:
 
 def main():
     scene_shape = (800, 1000)
+    num_ants = 50
+    num_food = 10
+    
     colony = Colony(scene_shape)
-    colony.add_ants(50)
+    colony.add_ants(num_ants)
     
     scene = Scene(colony)
     scene.add_background(scene_shape)
-    scene.add_food()
+    scene.add_food(num_food)
  
     scene.show_with_trails()
     scene.show()

@@ -17,14 +17,16 @@ class Ant:
         # brain outputs ant.acceleration vector
         self.brain.fit([[0,0,0,0]],[[0,0]])        
 
-    def think(self, limits, nearest_food):
+    def think(self, limits, food):
         # self.acceleration = np.random.normal(0, 1, 2) * ACCELERATION_STD
+        
+        nearest_food = food[0]
         
         # normalize inputs
         sx = self.position[1] / limits[1]
         sy = self.position[0] / limits[0]
-        fx = nearest_food[1] / limits[1]
-        fy = nearest_food[0] / limits[0]
+        fx = nearest_food.position[1] / limits[1]
+        fy = nearest_food.position[0] / limits[0]
         self.acceleration = self.brain.predict([[sx,sy,fx,fy]])[0]
 
     def move(self, limits):
