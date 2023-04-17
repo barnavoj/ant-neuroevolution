@@ -13,13 +13,21 @@ class Ant:
         self.acceleration = 0
         
         self.brain = MLPRegressor(hidden_layer_sizes=(5,), max_iter=1)
+        # brain inputs  ant x,y/ nearestfood x,y
+        # brain outputs ant.acceleration vector
         self.brain.fit([[0,0,0,0]],[[0,0]])        
 
-
-    def move(self, limits):
+    def think(self, limits, nearest_food):
         # self.acceleration = np.random.normal(0, 1, 2) * ACCELERATION_STD
         
-        self.acceleration = self.brain.predict([[1,1,1,1]])[0]
+        # normalize inputs
+        sx = self.position[1] / limits[1]
+        sy = self.position[0] / limits[0]
+        fx = nearest_food[1] / limits[1]
+        fy = nearest_food[0] / limits[0]
+        self.acceleration = self.brain.predict([[sx,sy,fx,fy]])[0]
+
+    def move(self, limits):
         
         self.speed += self.acceleration
 
