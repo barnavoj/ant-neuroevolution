@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+import time
 
 
 MAX_SPEED = 0.6
@@ -32,28 +33,44 @@ class Colony:
             ant.move(limits)
 
     def show_with_trails(self):
+        frame = 0
+        t = 0
         while True:
+            frame += 1
             self.update()
             self.live_scene = self.hist_scene.copy()
             for ant in self.ants:
                 ant.draw_body(self.live_scene)
                 ant.draw_trail(self.hist_scene)
 
+            if frame % 30 == 0:
+                dt = time.time() - t
+                print("FPS: ", round(30*1/dt))
+                t = time.time()
+
             cv.imshow("ants with trails", self.live_scene)
-            if cv.waitKey(10) == ord('q'):
+            if cv.waitKey(1) == ord('q'):
                 # press q to terminate the loop
                 cv.destroyAllWindows()
                 break
 
     def show(self):
+        frame = 0
+        t = 0
         while True:
+            frame += 1
             self.update()
             self.live_scene = self.background.copy()
             for ant in self.ants:
-                ant.draw_body(self.live_scene)\
+                ant.draw_body(self.live_scene)
+
+            if frame % 30 == 0:
+                dt = time.time() - t
+                print("FPS: ", round(30*1/dt))
+                t = time.time()
 
             cv.imshow("ants", self.live_scene)
-            if cv.waitKey(10) == ord('q'):
+            if cv.waitKey(1) == ord('q'):
                 # press q to terminate the loop
                 cv.destroyAllWindows()
                 break
@@ -91,18 +108,18 @@ class Ant:
             self.position[1] = limits[1]
 
     def draw_trail(self, scene):
-        pt1 = (int(self.position[0]), int(self.position[1]))
+        pt1 = (int(self.position[1]), int(self.position[0]))
         scene = cv.circle(scene, pt1, 1, self.colour, -1)
 
     def draw_body(self, scene):
-        pt1 = (int(self.position[0]), int(self.position[1]))
+        pt1 = (int(self.position[1]), int(self.position[0]))
         scene = cv.circle(scene, pt1, self.size, self.colour, -1)
 
 
 def main():
     colony = Colony()
-    colony.add_background(400, 400)
-    colony.add_ants(20)
+    colony.add_background(800, 1000)
+    colony.add_ants(50)
     colony.show_with_trails()
     colony.show()
 
