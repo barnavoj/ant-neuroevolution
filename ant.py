@@ -4,6 +4,10 @@ import numpy as np
 from config import ACCELERATION_STD, MAX_SPEED, FOOD_REGEN, HEALTH_DECREASE
 from sklearn.neural_network import MLPRegressor
 
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
+
 class Ant:
     def __init__(self, position, size, colour, brain=None):
         

@@ -3,10 +3,10 @@ import numpy as np
 import time
 
 from helpers import find_closest_food, distance_between
+from config import FRAMES_TO_RESET, NUM_ANTS, NUM_FOOD, SCENE_SHAPE
 
 from ant import Ant
 from food import Food
-
 
 class Colony:
     def __init__(self, scene_shape):
@@ -144,8 +144,9 @@ class Scene:
             #     t = time.time()
 
     def training_loop_and_show(self):
+                
+        t = time.time()
         frame = 0
-        t = 0
         while True:
             frame += 1
             
@@ -159,9 +160,9 @@ class Scene:
             for i, food in enumerate(self.food):
                 food.draw(self.live_scene, i)
 
-            if frame > 200 == 0:
+            if frame%50 == 0:
                 dt = time.time() - t
-                #print("FPS: ", round(30*1/dt))
+                print("FPS: ", round(50/dt))
                 t = time.time()
 
             cv.imshow("ants", self.live_scene)
@@ -169,19 +170,27 @@ class Scene:
                 # press q to terminate the loop
                 cv.destroyAllWindows()
                 break
-    
+            
+            if frame > FRAMES_TO_RESET:
+                print("New generation")
+                frame = 0
+                
+                #calc fitness of survivor ants
+                #pick new ants with brains based on fitness probability density
+                #star over
+                
+                self.colony.ants = []
+                self.colony.add_ants(NUM_ANTS)
 
-def main():
-    scene_shape = (800, 800)
-    num_ants = 100
-    num_food = 20
-    
-    colony = Colony(scene_shape)
-    colony.add_ants(num_ants)
+            
+
+def main():  
+    colony = Colony(SCENE_SHAPE)
+    colony.add_ants(NUM_ANTS)
     
     scene = Scene(colony)
-    scene.add_background(scene_shape)
-    scene.add_food(num_food)
+    scene.add_background(SCENE_SHAPE)
+    scene.add_food(NUM_FOOD)
  
     # scene.show_with_trails()
     # scene.show()
