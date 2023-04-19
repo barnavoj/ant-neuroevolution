@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-from config import ACCELERATION_STD, MAX_SPEED
+from config import ACCELERATION_STD, MAX_SPEED, FOOD_REGEN, HEALTH_DECREASE
 from sklearn.neural_network import MLPRegressor
 
 class Ant:
@@ -90,6 +90,12 @@ class Ant:
 
         if self.position[1] < 0:
             self.position[1] = limits[1]
+        
+    def starve(self):
+        self.health -= HEALTH_DECREASE
+        
+    def regen(self):
+        self.health += FOOD_REGEN
             
         
     def draw_trail(self, scene):

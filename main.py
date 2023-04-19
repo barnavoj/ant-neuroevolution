@@ -27,7 +27,6 @@ class Colony:
 
     def update(self, food):
         limits = (self.scene_shape[0], self.scene_shape[1])
-        ants_to_remove = []
         for i, ant in enumerate(self.ants):
             #find nearest food
             closest_food_index = find_closest_food(ant, food)
@@ -37,7 +36,7 @@ class Colony:
             ant.move(limits)
             
             # decrease health over time and add score
-            ant.health -= 0.1
+            ant.starve()
             ant.score += 1
             
             # eat food if close enough
@@ -46,11 +45,13 @@ class Colony:
                 #food.pop(closest_food_index)
                 closest_food.position = [np.random.randint(0, limits[0]),
                                  np.random.randint(0, limits[1])]
-                ant.health += 20
+                ant.regen()
+                print("Ant ", i, " ate food. Health remainig: ", round(ant.health))
             
             # die if zero health
             if ant.health < 1:
                 self.ants.pop(i)
+                print("Ant ", i, " died. Ants remaining: ",  len(self.ants))
                 
 
 
@@ -129,12 +130,50 @@ class Scene:
                 # press q to terminate the loop
                 cv.destroyAllWindows()
                 break
+    
+    def run_without_showing(self):
+        frame = 0
+        t = 0
+        while True:
+            frame += 1
+            #Show Colony
+            self.colony.update(self.food)
+            # if frame % 30 == 0:
+            #     dt = time.time() - t
+            #     print("FPS: ", round(30*1/dt))
+            #     t = time.time()
 
+    def training_loop_and_show(self):
+        frame = 0
+        t = 0
+        while True:
+            frame += 1
+            
+            #Show Colony
+            self.colony.update(self.food)
+            self.live_scene = self.background.copy()
+            for i, ant in enumerate(self.colony.ants):
+                ant.draw_body(self.live_scene, i)
+                
+            #Show food
+            for i, food in enumerate(self.food):
+                food.draw(self.live_scene, i)
 
+            if frame > 200 == 0:
+                dt = time.time() - t
+                #print("FPS: ", round(30*1/dt))
+                t = time.time()
+
+            cv.imshow("ants", self.live_scene)
+            if cv.waitKey(1) == ord('q'):
+                # press q to terminate the loop
+                cv.destroyAllWindows()
+                break
+    
 
 def main():
-    scene_shape = (800, 1000)
-    num_ants = 200
+    scene_shape = (800, 800)
+    num_ants = 100
     num_food = 20
     
     colony = Colony(scene_shape)
@@ -144,8 +183,11 @@ def main():
     scene.add_background(scene_shape)
     scene.add_food(num_food)
  
-    scene.show_with_trails()
-    scene.show()
+    # scene.show_with_trails()
+    # scene.show()
+    # scene.run_without_showing()
+    
+    scene.training_loop_and_show()
 
 
 if __name__ == '__main__':
