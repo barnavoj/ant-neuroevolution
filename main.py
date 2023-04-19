@@ -14,23 +14,21 @@ class Colony:
         self.ants = []
         self.scene_shape = scene_shape
 
-    def add_ants(self, num_ants, brain=None):
+    def add_ants(self, num_ants, brain_1=None, brain_2=None):
         self.num_ants = num_ants
 
         for i in range(num_ants):
             position = [np.random.randint(0, self.scene_shape[0]),
                         np.random.randint(0, self.scene_shape[1])]
             
-            if brain is not None:
-                new_ant = Ant(position, brain=brain)
+            if brain_1 is not None and brain_2 is not None:
+                new_ant = Ant(position, brain_1=brain_1, brain_2=brain_2)
             else:
                 new_ant = Ant(position)
             
             self.ants.append(new_ant)
         
         
-       
-
     def update(self, food):
         limits = (self.scene_shape[0], self.scene_shape[1])
         for i, ant in enumerate(self.ants):
@@ -53,12 +51,12 @@ class Colony:
                                  np.random.randint(0, limits[1])]
                 ant.regen()
                 ant.score += SCORE_PER_FOOD
-                print("Ant ", i, " ate food. Health remainig: ", round(ant.health))
+                #print("Ant ", i, " ate food. Health remainig: ", round(ant.health))
             
             # die if zero health
             if ant.health < 1:
                 self.ants.pop(i)
-                print("Ant ", i, " died. Ants remaining: ",  len(self.ants))
+                #print("Ant ", i, " died. Ants remaining: ",  len(self.ants))
                 
 
 
@@ -178,19 +176,21 @@ class Scene:
                 cv.destroyAllWindows()
                 break
             
-            if frame > FRAMES_TO_RESET:
-                generation += 1
-                print("\nGeneration ", generation," spawning\n")
+            if frame > FRAMES_TO_RESET or len(self.colony.ants) == 2:
                 frame = 0
                 
                 # sort ants based on score and use best ant's brain
                 self.colony.ants.sort(key=lambda x: x.score, reverse=True)
-                best_ant = self.colony.ants[0]
-                #possibly implement crossover here
-                #best_ant_2 = self.colony.ants[1]
+                best_ant_1 = self.colony.ants[0]
+                best_ant_2 = self.colony.ants[1]
+                
+                print("Generation ", generation," best score: ", best_ant_1.score)
                 
                 self.colony.ants = []
-                self.colony.add_ants(NUM_ANTS, best_ant.brain)
+                self.colony.add_ants(NUM_ANTS, best_ant_1.brain, best_ant_2.brain)
+                
+                generation += 1
+                print("\nGeneration ", generation," spawning\n")
 
             
 

@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-from config import ACCELERATION_STD, MAX_SPEED, FOOD_REGEN, HEALTH_DECREASE, MUTATION_STD
+from config import ACCELERATION_STD, MAX_SPEED, FOOD_REGEN, HEALTH_DECREASE, MUTATION_STD, CROSSOVER_PROB
 from sklearn.neural_network import MLPRegressor
 
 import warnings
@@ -9,7 +9,7 @@ from sklearn.exceptions import ConvergenceWarning
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 class Ant:
-    def __init__(self, position, size=3, colour=(0, 0, 0), brain=None):
+    def __init__(self, position, size=3, colour=(0, 0, 0), brain_1=None, brain_2=None):
         
         # Check position type and always use tuple
         if type(position) is not tuple and type(position) is not list:
@@ -55,12 +55,25 @@ class Ant:
         # brain outputs ant.acceleration vector
         self.brain.fit([[0,0,0,0]],[[0,0]])
         
-        if brain is not None:
-            #Use and mutate the brain   
-            for i in range(len(brain.coefs_)):
-                self.brain.coefs_[i] = brain.coefs_[i] + np.random.normal(0, MUTATION_STD, brain.coefs_[i].shape)
-                self.brain.intercepts_[i] = brain.intercepts_[i] + np.random.normal(0, MUTATION_STD, brain.intercepts_[i].shape)
-                        
+        if brain_1 is not None and brain_2 is not None:
+            # crossover here
+            for i, layer in enumerate(brain_2.coefs_):
+                for j, ws in enumerate(layer):
+                    for k, w in enumerate(ws):
+                        if np.random.uniform(0,1) < CROSSOVER_PROB:
+                            brain_1.coefs_[i][j][k] = w  
+                                      
+            for i, layer in enumerate(brain_2.intercepts_):
+                for j, bias in enumerate(layer):
+                    if np.random.uniform(0,1) < CROSSOVER_PROB:
+                        brain_1.intercepts_[i][j] = bias
+            
+            # mutate the brain   
+            for i in range(len(brain_1.coefs_)):
+                self.brain.coefs_[i] = brain_1.coefs_[i] + np.random.normal(0, MUTATION_STD, brain_1.coefs_[i].shape)
+                self.brain.intercepts_[i] = brain_1.intercepts_[i] + np.random.normal(0, MUTATION_STD, brain_1.intercepts_[i].shape)
+ 
+
         self.health = 100    
         self.score = 0
         
