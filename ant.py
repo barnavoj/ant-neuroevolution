@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 
-from config import ACCELERATION_STD, MAX_SPEED, FOOD_REGEN, HEALTH_DECREASE
+from config import ACCELERATION_STD, MAX_SPEED, FOOD_REGEN, HEALTH_DECREASE, MUTATION_STD
 from sklearn.neural_network import MLPRegressor
 
 import warnings
@@ -49,15 +49,18 @@ class Ant:
         self.size = size
         self.speed = 0
         self.acceleration = 0
-
-        if brain is None:
-            self.brain = MLPRegressor(hidden_layer_sizes=(5,), max_iter=1)
-            # brain inputs  ant x,y/ nearestfood x,y
-            # brain outputs ant.acceleration vector
-            self.brain.fit([[0,0,0,0]],[[0,0]])
-        else:
-            self.brain = brain   
-            
+        
+        self.brain = MLPRegressor(hidden_layer_sizes=(5,), max_iter=1)
+        # brain inputs  ant x,y/ nearestfood x,y
+        # brain outputs ant.acceleration vector
+        self.brain.fit([[0,0,0,0]],[[0,0]])
+        
+        if brain is not None:
+            #Use and mutate the brain   
+            for i in range(len(brain.coefs_)):
+                self.brain.coefs_[i] = brain.coefs_[i] + np.random.normal(0, MUTATION_STD, brain.coefs_[i].shape)
+                self.brain.intercepts_[i] = brain.intercepts_[i] + np.random.normal(0, MUTATION_STD, brain.intercepts_[i].shape)
+                        
         self.health = 100    
         self.score = 0
         
@@ -101,7 +104,6 @@ class Ant:
     def regen(self):
         self.health += FOOD_REGEN
             
-        
     def draw_trail(self, scene):
         pt1 = (int(self.position[1]), int(self.position[0]))
         scene = cv.circle(scene, pt1, 1, self.colour, -1)

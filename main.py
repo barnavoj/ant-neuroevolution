@@ -3,7 +3,7 @@ import numpy as np
 import time
 
 from helpers import find_closest_food, distance_between
-from config import FRAMES_TO_RESET, NUM_ANTS, NUM_FOOD, SCENE_SHAPE
+from config import FRAMES_TO_RESET, NUM_ANTS, NUM_FOOD, SCENE_SHAPE, SCORE_PER_FRAME, SCORE_PER_FOOD
 
 from ant import Ant
 from food import Food
@@ -14,15 +14,15 @@ class Colony:
         self.ants = []
         self.scene_shape = scene_shape
 
-    def add_ants(self, num_ants, best_ant=None):
+    def add_ants(self, num_ants, brain=None):
         self.num_ants = num_ants
 
         for i in range(num_ants):
             position = [np.random.randint(0, self.scene_shape[0]),
                         np.random.randint(0, self.scene_shape[1])]
             
-            if best_ant is not None:
-                new_ant = Ant(position, brain=best_ant.brain)
+            if brain is not None:
+                new_ant = Ant(position, brain=brain)
             else:
                 new_ant = Ant(position)
             
@@ -43,7 +43,7 @@ class Colony:
             
             # decrease health over time and add score
             ant.starve()
-            ant.score += 1
+            ant.score += SCORE_PER_FRAME
             
             # eat food if close enough
             min_dist = ant.size + closest_food.size
@@ -52,6 +52,7 @@ class Colony:
                 closest_food.position = [np.random.randint(0, limits[0]),
                                  np.random.randint(0, limits[1])]
                 ant.regen()
+                ant.score += SCORE_PER_FOOD
                 print("Ant ", i, " ate food. Health remainig: ", round(ant.health))
             
             # die if zero health
@@ -182,12 +183,14 @@ class Scene:
                 print("\nGeneration ", generation," spawning\n")
                 frame = 0
                 
-                #calc fitness of survivor ants
-                #pick new ants with brains based on fitness probability density
-                #star over
+                # sort ants based on score and use best ant's brain
+                self.colony.ants.sort(key=lambda x: x.score, reverse=True)
                 best_ant = self.colony.ants[0]
+                #possibly implement crossover here
+                #best_ant_2 = self.colony.ants[1]
+                
                 self.colony.ants = []
-                self.colony.add_ants(NUM_ANTS, best_ant)
+                self.colony.add_ants(NUM_ANTS, best_ant.brain)
 
             
 
