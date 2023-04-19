@@ -6,12 +6,47 @@ from sklearn.neural_network import MLPRegressor
 
 class Ant:
     def __init__(self, position, size, colour):
-        self.position = position
+        
+        # Check position type and always use tuple
+        if type(position) is not tuple and type(position) is not list:
+            raise TypeError
+        elif type(position) is list:
+            position = tuple(position)
+        
+        # Check position length
+        if len(position) != 2:
+            raise ValueError
+       
+        # Check position elements are int
+        if not all(isinstance(elem, int) for elem in position):
+            raise ValueError
+        
+        # Check color type and always use tuple    
+        if type(colour) is not tuple and type(colour) is not list:
+            raise TypeError
+        elif type(colour) is list:
+            colour = tuple(colour)
+
+        # Check color length
+        if len(colour) != 3:
+            raise ValueError
+        
+        # Check colour elements are int
+        if not all(isinstance(elem, int) for elem in colour):
+            raise ValueError
+        
+        # Check size is int
+        if not isinstance(size, int):
+            raise ValueError
+
+            
+        self.position = position    
         self.colour = colour
         self.size = size
         self.speed = 0
         self.acceleration = 0
-        
+
+    
         self.brain = MLPRegressor(hidden_layer_sizes=(5,), max_iter=1)
         # brain inputs  ant x,y/ nearestfood x,y
         # brain outputs ant.acceleration vector
