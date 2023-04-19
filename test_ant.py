@@ -1,5 +1,7 @@
 import unittest
+import numpy as np
 from ant import Ant
+
 
 class TestAnt(unittest.TestCase):
     
@@ -39,11 +41,9 @@ class TestAnt(unittest.TestCase):
             Ant((0,0), 5.4, (0,0,0))
             
     def test_think(self):
-        self.assertEquals(self.ant1.brain.predict([[0,0,0,0]])[0], )
-            
-        
-
-        
+        self.assertEquals(type(self.ant1.brain.predict([[0,0,0,0]])[0]), np.ndarray)
+        self.assertEquals(len(self.ant1.brain.predict([[0,0,0,0]])[0]), 2)
+                  
 
 
 if __name__ == "__main__":
