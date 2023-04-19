@@ -14,15 +14,21 @@ class Colony:
         self.ants = []
         self.scene_shape = scene_shape
 
-    def add_ants(self, num_ants):
+    def add_ants(self, num_ants, best_ant=None):
         self.num_ants = num_ants
 
         for i in range(num_ants):
             position = [np.random.randint(0, self.scene_shape[0]),
                         np.random.randint(0, self.scene_shape[1])]
-            colour = (0, 0, 0)
-            new_ant = Ant(position, 3, colour)
+            
+            if best_ant is not None:
+                new_ant = Ant(position, brain=best_ant.brain)
+            else:
+                new_ant = Ant(position)
+            
             self.ants.append(new_ant)
+        
+        
        
 
     def update(self, food):
@@ -72,8 +78,8 @@ class Scene:
         for i in range(num_food):
             position = [np.random.randint(0, self.scene_shape[0]),
                         np.random.randint(0, self.scene_shape[1])]
-            colour = (0, 0, 255)
-            new_food = Food(position, 5, colour)
+            
+            new_food = Food(position)
             self.food.append(new_food)
 
     def show_with_trails(self):
@@ -144,7 +150,7 @@ class Scene:
             #     t = time.time()
 
     def training_loop_and_show(self):
-                
+        generation = 0       
         t = time.time()
         frame = 0
         while True:
@@ -172,15 +178,16 @@ class Scene:
                 break
             
             if frame > FRAMES_TO_RESET:
-                print("New generation")
+                generation += 1
+                print("\nGeneration ", generation," spawning\n")
                 frame = 0
                 
                 #calc fitness of survivor ants
                 #pick new ants with brains based on fitness probability density
                 #star over
-                
+                best_ant = self.colony.ants[0]
                 self.colony.ants = []
-                self.colony.add_ants(NUM_ANTS)
+                self.colony.add_ants(NUM_ANTS, best_ant)
 
             
 

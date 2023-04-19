@@ -9,7 +9,7 @@ from sklearn.exceptions import ConvergenceWarning
 warnings.filterwarnings("ignore", category=ConvergenceWarning)
 
 class Ant:
-    def __init__(self, position, size, colour, brain=None):
+    def __init__(self, position, size=3, colour=(0, 0, 0), brain=None):
         
         # Check position type and always use tuple
         if type(position) is not tuple and type(position) is not list:

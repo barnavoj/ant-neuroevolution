@@ -3,7 +3,7 @@ import numpy as np
 
 
 class Food:
-    def __init__(self, position, size, colour):
+    def __init__(self, position, size=5, colour=(0, 0, 255)):
         
         # Check position type and always use tuple
         if type(position) is not tuple and type(position) is not list:
