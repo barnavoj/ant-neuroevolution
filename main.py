@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy as np
 import time
 
-from helpers import find_closest_food
+from helpers import find_closest_food, distance_between
 
 from ant import Ant
 from food import Food
@@ -27,15 +27,32 @@ class Colony:
 
     def update(self, food):
         limits = (self.scene_shape[0], self.scene_shape[1])
-    
+        ants_to_remove = []
         for i, ant in enumerate(self.ants):
             #find nearest food
             closest_food_index = find_closest_food(ant, food)
-
-            ant.think(limits, food[closest_food_index])
+            closest_food = food[closest_food_index]
+            
+            ant.think(limits, closest_food)
             ant.move(limits)
             
-            #print("Ant " + str(i) + " closest food: " + str(closest_food_index))
+            # decrease health over time and add score
+            ant.health -= 0.1
+            ant.score += 1
+            
+            # eat food if close enough
+            min_dist = ant.size + closest_food.size
+            if distance_between(ant, closest_food) < min_dist:
+                #food.pop(closest_food_index)
+                closest_food.position = [np.random.randint(0, limits[0]),
+                                 np.random.randint(0, limits[1])]
+                ant.health += 20
+            
+            # die if zero health
+            if ant.health < 1:
+                self.ants.pop(i)
+                
+
 
 class Scene:
     def __init__(self, colony):
@@ -117,8 +134,8 @@ class Scene:
 
 def main():
     scene_shape = (800, 1000)
-    num_ants = 2
-    num_food = 2
+    num_ants = 200
+    num_food = 20
     
     colony = Colony(scene_shape)
     colony.add_ants(num_ants)

@@ -5,7 +5,7 @@ from config import ACCELERATION_STD, MAX_SPEED
 from sklearn.neural_network import MLPRegressor
 
 class Ant:
-    def __init__(self, position, size, colour):
+    def __init__(self, position, size, colour, brain=None):
         
         # Check position type and always use tuple
         if type(position) is not tuple and type(position) is not list:
@@ -46,12 +46,18 @@ class Ant:
         self.speed = 0
         self.acceleration = 0
 
-    
-        self.brain = MLPRegressor(hidden_layer_sizes=(5,), max_iter=1)
-        # brain inputs  ant x,y/ nearestfood x,y
-        # brain outputs ant.acceleration vector
-        self.brain.fit([[0,0,0,0]],[[0,0]])        
-
+        if brain is None:
+            self.brain = MLPRegressor(hidden_layer_sizes=(5,), max_iter=1)
+            # brain inputs  ant x,y/ nearestfood x,y
+            # brain outputs ant.acceleration vector
+            self.brain.fit([[0,0,0,0]],[[0,0]])
+        else:
+            self.brain = brain   
+            
+        self.health = 100    
+        self.score = 0
+        
+        
     def think(self, limits, nearest_food):
         # self.acceleration = np.random.normal(0, 1, 2) * ACCELERATION_STD
               
@@ -84,7 +90,8 @@ class Ant:
 
         if self.position[1] < 0:
             self.position[1] = limits[1]
-
+            
+        
     def draw_trail(self, scene):
         pt1 = (int(self.position[1]), int(self.position[0]))
         scene = cv.circle(scene, pt1, 1, self.colour, -1)
@@ -94,3 +101,5 @@ class Ant:
         scene = cv.circle(scene, pt1, self.size, self.colour, -1)
         ## debug index
         #scene = cv.putText(scene, str(index), pt1, cv.FONT_ITALIC, 0.5, (0,0,0), 2)
+        # debug health
+        #scene = cv.putText(scene, str(round(self.health)), pt1, cv.FONT_ITALIC, 0.5, (0,0,0), 2)

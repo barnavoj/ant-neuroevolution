@@ -43,7 +43,8 @@ class TestAnt(unittest.TestCase):
     def test_think(self):
         self.assertEquals(type(self.ant1.brain.predict([[0,0,0,0]])[0]), np.ndarray)
         self.assertEquals(len(self.ant1.brain.predict([[0,0,0,0]])[0]), 2)
-                  
+            
+      
 
 
 if __name__ == "__main__":
